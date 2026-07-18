@@ -1,1 +1,2 @@
 - [Bot whitelist](bot-whitelist.md) — Discord bot access restricted via ALLOWED_GUILD_IDS / ALLOWED_USER_IDS env vars.
+- [API portable storage](api-portable-storage.md) — Scripts stored in local JSON so the API works on any host.

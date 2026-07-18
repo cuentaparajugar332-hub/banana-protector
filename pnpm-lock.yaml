@@ -167,9 +167,6 @@ importers:
 
   artifacts/api-server:
     dependencies:
-      '@replit/database':
-        specifier: ^3.0.1
-        version: 3.0.1
       '@workspace/api-zod':
         specifier: workspace:*
         version: link:../../lib/api-zod
@@ -1279,10 +1276,6 @@ packages:
 
   '@replit/connectors-sdk@0.4.1':
     resolution: {integrity: sha512-iw0uy95+Qul8MPc/bBo8hBfYk1wm6RpBZ9sHyCpcA9A9T4zcUT9deSQxdyMyI0w3sv3+5uGmdfq1TpFTMrjD1g==}
-
-  '@replit/database@3.0.1':
-    resolution: {integrity: sha512-uCmuttqjhI+unsEtXLVm28FTkdX4m815r+INkXJsIFAvHIw3+h5mJv6X/xf3YOy2jjrZVPppsjNRqFeWEQFYQw==}
-    engines: {node: '>=18'}
 
   '@replit/vite-plugin-cartographer@0.5.21':
     resolution: {integrity: sha512-E5rco8Mov05QDfUOjoim3MVJdDX0/pBYql5Jay3w9cqmU/QOL6cEOUAjsBZPB/V8FEChsk++sZUrcWt1bHaAoQ==}
@@ -3840,8 +3833,6 @@ snapshots:
   '@radix-ui/rect@1.1.2': {}
 
   '@replit/connectors-sdk@0.4.1': {}
-
-  '@replit/database@3.0.1': {}
 
   '@replit/vite-plugin-cartographer@0.5.21':
     dependencies:

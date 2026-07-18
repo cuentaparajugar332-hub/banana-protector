@@ -43,5 +43,5 @@ timeoutMs = 20000
 
 [userenv.shared]
 BOT_API_KEY = "banana_bot_key_x7k9m2p4q8r3s6t1u5v0w"
-API_BASE_URL = "https://api.h4xscripts.xyz"
+API_BASE_URL = "https://0899b3f8-dcda-480d-a20c-e5cbd72d4141-00-21hj25nsafxfl.kirk.replit.dev"
 ALLOWED_GUILD_IDS = "1528140415276941555"
