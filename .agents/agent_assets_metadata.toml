@@ -6,3 +6,9 @@ id = "H4eZt2d-Wk3n1pBRYLTTf"
 uri = "file://banana-protector.zip"
 type = "unspecified"
 title = "banana-protector.zip"
+
+[[outputs]]
+id = "z57kKWm0xhR8r7rFJlNuz"
+uri = "file://banana-protector-v2.zip"
+type = "unspecified"
+title = "Banana Protector v2 - Bot + API"
