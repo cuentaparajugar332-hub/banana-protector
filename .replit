@@ -18,3 +18,8 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[userenv]
+
+[userenv.shared]
+BOT_API_KEY = "banana_bot_key_x7k9m2p4q8r3s6t1u5v0w"
