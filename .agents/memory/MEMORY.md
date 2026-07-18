@@ -1,0 +1,1 @@
+- [Bot whitelist](bot-whitelist.md) — Discord bot access restricted via ALLOWED_GUILD_IDS / ALLOWED_USER_IDS env vars.
