@@ -1,48 +1,19 @@
 import { Router, type Request, type Response } from "express";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import Client from "@replit/database";
 import { randomBytes } from "crypto";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = join(__dirname, "..", "..", "data");
-const SCRIPTS_FILE = join(DATA_DIR, "scripts.json");
+const db = new Client();
 
-// Ensure data directory exists
-if (!existsSync(DATA_DIR)) {
-  mkdirSync(DATA_DIR, { recursive: true });
+async function dbGet(key: string): Promise<any> {
+  const result = await db.get(key);
+  return result.ok ? result.value : null;
 }
 
-function loadScripts(): Record<string, { content: string; password?: string; createdAt: string }> {
-  if (!existsSync(SCRIPTS_FILE)) return {};
-  try {
-    return JSON.parse(readFileSync(SCRIPTS_FILE, "utf-8"));
-  } catch {
-    return {};
-  }
+async function dbSet(key: string, value: any): Promise<void> {
+  const result = await db.set(key, value);
+  if (!result.ok) throw new Error(result.error?.message || "Failed to save to database");
 }
 
-function saveScripts(scripts: Record<string, { content: string; password?: string; createdAt: string }>) {
-  writeFileSync(SCRIPTS_FILE, JSON.stringify(scripts, null, 2), "utf-8");
-}
-
-function generateSlug(): string {
-  return randomBytes(5).toString("hex"); // 10 hex chars
-}
-
-export function createScript(content: string, password?: string): string {
-  const scripts = loadScripts();
-  let slug = generateSlug();
-  // Avoid collisions
-  while (scripts[slug]) slug = generateSlug();
-  scripts[slug] = { content, password, createdAt: new Date().toISOString() };
-  saveScripts(scripts);
-  return slug;
-}
-
-const router = Router();
-
-// GET /api/s/:slug — public script serving (blocks browsers)
 const BLOCKED_PAGE = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Blocked</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0d0d0d;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',sans-serif}.card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:48px 56px;text-align:center;max-width:420px}.icon{font-size:64px;margin-bottom:20px}h1{color:#e0e0e0;font-size:22px;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-transform:uppercase}p{color:#666;font-size:14px;line-height:1.6}.brand{margin-top:24px;font-size:11px;color:#333;letter-spacing:1px;text-transform:uppercase}</style></head><body><div class="card"><div class="icon">🚫</div><h1>You are blocked</h1><p>You can't get this code</p><div class="brand">Banana API Protection</div></div></body></html>`;
 
 const BAD_BOTS = [/bot/i, /crawler/i, /spider/i, /scraper/i, /zgrab/i, /nuclei/i, /masscan/i, /nmap/i, /sqlmap/i, /nikto/i, /dirbuster/i, /gobuster/i, /wfuzz/i];
@@ -60,32 +31,64 @@ function blockBrowsers(req: Request, res: Response, next: () => void): void {
   next();
 }
 
-router.get("/:slug", blockBrowsers, (req: Request, res: Response) => {
-  const { slug } = req.params;
-  const scripts = loadScripts();
-  const script = scripts[slug];
+function generateSlug(): string {
+  return randomBytes(5).toString("hex");
+}
 
-  if (!script) {
+function buildUrl(req: Request, slug: string): string {
+  // If you want a fixed custom domain (e.g. https://api.h4xscripts.xyz), set API_BASE_URL.
+  const base = process.env.API_BASE_URL;
+  if (base) return `${base.replace(/\/$/, "")}/api/s/${slug}`;
+
+  const proto = req.headers["x-forwarded-proto"] || req.protocol;
+  const host = req.headers["x-forwarded-host"] || req.headers.host || "localhost";
+  return `${proto}://${host}/api/s/${slug}`;
+}
+
+export async function createScript(content: string, password?: string): Promise<string> {
+  let slug = generateSlug();
+  let existing = await dbGet(`script:${slug}`);
+  let attempts = 0;
+  while (existing && attempts < 10) {
+    slug = generateSlug();
+    existing = await dbGet(`script:${slug}`);
+    attempts++;
+  }
+  if (existing) throw new Error("Could not generate unique slug");
+
+  await dbSet(`script:${slug}`, { content, password: password || null, createdAt: new Date().toISOString() });
+  return slug;
+}
+
+const router = Router();
+
+// GET /api/s/:slug — public script serving (blocks browsers)
+router.get("/:slug", blockBrowsers, async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const record = await dbGet(`script:${slug}`);
+
+  if (!record || typeof record !== "object") {
     res.status(404).type("text").send("Script not found");
     return;
   }
 
-  // Password check
-  if (script.password) {
+  const { content, password } = record as { content?: string; password?: string | null };
+
+  if (password) {
     const pw =
       (req.query["pw"] as string | undefined) ||
       req.headers["authorization"]?.replace(/^Bearer\s+/i, "");
-    if (!pw || pw !== script.password) {
+    if (!pw || pw !== password) {
       res.status(401).type("text").send("Invalid or missing password. Pass ?pw=<password>");
       return;
     }
   }
 
-  res.type("text").send(script.content);
+  res.type("text").send(content || "");
 });
 
 // POST /api/s — bot-only script creation (requires BOT_API_KEY header)
-router.post("/", (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   const botKey = process.env.BOT_API_KEY;
   const providedKey = req.headers["x-bot-key"] as string | undefined;
 
@@ -101,13 +104,12 @@ router.post("/", (req: Request, res: Response) => {
     return;
   }
 
-  const slug = createScript(content.trim(), password || undefined);
-
-  const proto = req.headers["x-forwarded-proto"] || req.protocol;
-  const host = req.headers["x-forwarded-host"] || req.headers.host || "localhost";
-  const url = `${proto}://${host}/api/s/${slug}`;
-
-  res.status(201).json({ slug, url });
+  try {
+    const slug = await createScript(content.trim(), password || undefined);
+    res.status(201).json({ slug, url: buildUrl(req, slug) });
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
 });
 
 export default router;
