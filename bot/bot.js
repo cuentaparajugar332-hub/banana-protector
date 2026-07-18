@@ -329,8 +329,7 @@ client.on("interactionCreate", async (interaction) => {
       .addFields({
         name: "🛡️ About Banana Protector",
         value:
-          "Banana Protector obfuscates your Lua scripts using advanced techniques like " +
-          "rolling XOR ciphers, control-flow flattening, junk code injection, and 18-layer VM wrapping. " +
+          "Banana Protector protects your Lua scripts. " +
           "Join our community: [discord.gg/P7n9kAmwv](https://discord.gg/P7n9kAmwv)",
         inline: false,
       })
