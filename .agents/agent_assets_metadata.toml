@@ -12,3 +12,9 @@ id = "z57kKWm0xhR8r7rFJlNuz"
 uri = "file://banana-protector-v2.zip"
 type = "unspecified"
 title = "Banana Protector v2 - Bot + API"
+
+[[outputs]]
+id = "vbhhy7JpdCW6SzQHW9epT"
+uri = "file://banana-standalone-v2.zip"
+type = "unspecified"
+title = "Banana Protector Standalone v2 — funciona en cualquier servidor"
