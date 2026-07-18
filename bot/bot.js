@@ -2,11 +2,13 @@
 // Commands: /api_url, /make_file, /help
 
 const { Client, GatewayIntentBits, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder, REST, Routes } = require("discord.js");
-const fetch = require("node-fetch");
 const { obfuscate } = require("./obfuscator.js");
-const { createWriteStream, mkdirSync, existsSync } = require("fs");
+const { writeFileSync, mkdirSync, existsSync } = require("fs");
 const path = require("path");
 const os = require("os");
+
+// Discord.js already includes a built-in fetch-like utility, use native fetch if available, else undici
+const fetch = globalThis.fetch || require("discord.js").fetch || (() => { throw new Error("fetch is not available"); });
 
 // ─── Config ────────────────────────────────────────────────────────────────
 const TOKEN = process.env.DISCORD_TOKEN;
