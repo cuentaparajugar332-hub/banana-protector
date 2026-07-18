@@ -18,6 +18,16 @@ const BOT_API_KEY = process.env.BOT_API_KEY;
 // API server URL — the local proxy or an override
 const API_BASE = process.env.API_BASE_URL || "http://localhost:80";
 
+// Whitelists — comma-separated IDs (e.g. "123456789,987654321")
+const ALLOWED_GUILD_IDS = (process.env.ALLOWED_GUILD_IDS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const ALLOWED_USER_IDS = (process.env.ALLOWED_USER_IDS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 if (!TOKEN) throw new Error("Missing DISCORD_TOKEN environment variable");
 if (!CLIENT_ID) throw new Error("Missing DISCORD_CLIENT_ID environment variable");
 if (!BOT_API_KEY) throw new Error("Missing BOT_API_KEY environment variable");
@@ -110,8 +120,27 @@ async function registerCommands() {
 }
 
 // ─── Interaction Handler ───────────────────────────────────────────────────
+function isAllowed(interaction) {
+  if (ALLOWED_GUILD_IDS.length === 0 && ALLOWED_USER_IDS.length === 0) return true;
+
+  const guildOk = ALLOWED_GUILD_IDS.length === 0 || (interaction.guildId && ALLOWED_GUILD_IDS.includes(interaction.guildId));
+  const userOk = ALLOWED_USER_IDS.length === 0 || (interaction.user && ALLOWED_USER_IDS.includes(interaction.user.id));
+
+  return guildOk && userOk;
+}
+
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand() && !interaction.isButton()) return;
+
+  if (!isAllowed(interaction)) {
+    if (interaction.isRepliable()) {
+      await interaction.reply({
+        content: "❌ You are not authorized to use this bot.",
+        ephemeral: true,
+      }).catch(() => {});
+    }
+    return;
+  }
 
   // ── Button: copy loadstring ──
   if (interaction.isButton()) {
