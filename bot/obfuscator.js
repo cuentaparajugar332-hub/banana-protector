@@ -1,7 +1,7 @@
-// Banana Protector Obfuscator
-// https://discord.gg/P7n9kAmwv
+// KingShield Obfuscator v2.0 (Enhanced)
+// https://discord.gg/KINGSHIELD
 
-const HEADER = `--[[ this code it's protected by banana protector    https://discord.gg/P7n9kAmwv ]]`
+const HEADER = `--[[ this code is protected by KingShield Obfuscator    https://discord.gg/P7n9kAmwv ]]`
 
 const IL_POOL = ["IIIIIIII1", "vvvvvv1", "vvvvvvvv2", "vvvvvv3", "IIlIlIlI1", "lvlvlvlv2", "I1","l1","v1","v2","v3","II","ll","vv", "I2"]
 const HANDLER_POOL = ["KQ","HF","W8","SX","Rj","nT","pL","qZ","mV","xB","yC","wD"]
@@ -22,7 +22,7 @@ function pickHandlers(count) {
 }
 
 function heavyMath(n) {
-  if (Math.random() < 0.8) return n.toString();
+  if (Math.random() < 0.75) return n.toString();
   let a = Math.floor(Math.random() * 3000) + 500
   let b = Math.floor(Math.random() * 50) + 2
   let c = Math.floor(Math.random() * 800) + 10
@@ -33,6 +33,22 @@ function heavyMath(n) {
 function mba() {
   let n = Math.random() > 0.5 ? 1 : 2, a = Math.floor(Math.random() * 70) + 15, b = Math.floor(Math.random() * 40) + 8;
   return `((${n}*${a}-${a})/(${b}+1)+${n})`;
+}
+
+// Extra mathcode: expressiones redundantes y operaciones bit a bit falsas
+function extraMathcode(expr) {
+  if (Math.random() > 0.4) return expr;
+  let choice = Math.floor(Math.random() * 3);
+  if (choice === 0) {
+    let r = Math.floor(Math.random() * 100) + 1;
+    return `((${expr}+${r})-${r})`;
+  } else if (choice === 1) {
+    let r1 = Math.floor(Math.random() * 50) + 1;
+    let r2 = Math.floor(Math.random() * 50) + 1;
+    return `((${expr}*${r1})/${r1}+${r2}-${r2})`;
+  } else {
+    return `((${expr}~0)~0)`;
+  }
 }
 
 const MAPEO = {
@@ -48,7 +64,7 @@ function detectAndApplyMappings(code) {
     if (regex.test(modified)) {
       let replacement = `"${word}"`;
       if (tech.includes("Aggressive Renaming")) { const v = generateIlName(); headers += `local ${v}="${word}";`; replacement = v; }
-      else if (tech.includes("String to Math")) replacement = `string.char(${word.split('').map(c => heavyMath(c.charCodeAt(0))).join(',')})`;
+      else if (tech.includes("String to Math")) replacement = `string.char(${word.split('').map(c => extraMathcode(heavyMath(c.charCodeAt(0)))).join(',')})`;
       else if (tech.includes("Mixed Boolean Arithmetic")) replacement = `((${mba()}==1 or true)and"${word}")`;
       regex.lastIndex = 0;
       modified = modified.replace(regex, (match) => `game[${replacement}]`);
@@ -89,7 +105,16 @@ function applyCFF(blocks) {
 }
 
 function runtimeString(str) {
-  return `string.char(${str.split('').map(c => heavyMath(c.charCodeAt(0))).join(',')})`;
+  return `string.char(${str.split('').map(c => extraMathcode(heavyMath(c.charCodeAt(0)))).join(',')})`;
+}
+
+// Custom debug machine: inserta código que ralentiza el debug y confunde
+function customDebugMachine() {
+  let code = '';
+  const dbgName = generateIlName();
+  code += `local ${dbgName}=function() local x=0; for i=1,1000 do x=x+math.sin(i)*math.cos(i) end return x end `;
+  code += `if debug and debug.getinfo then local _old=debug.getinfo; debug.getinfo=function(...) return {what="C"} end end `;
+  return code;
 }
 
 function buildTrueVM(payloadStr) {
@@ -157,6 +182,32 @@ function build18xVM(payloadStr) {
   return vm;
 }
 
+// Anti-env loggers: detecta si ciertas variables globales están siendo monitoreadas
+function antiEnvLoggers() {
+  let code = '';
+  const envChecks = [
+    { var: 'syn', check: 'type' },
+    { var: 'krnl', check: 'type' },
+    { var: 'scriptware', check: 'type' },
+    { var: 'sentinel', check: 'type' },
+    { var: 'wearedevs', check: 'type' },
+    { var: 'protosmasher', check: 'type' },
+    { var: 'oxygen', check: 'type' },
+    { var: 'shadow', check: 'type' }
+  ];
+  code += `local _detect=function() `;
+  for (let i = 0; i < envChecks.length; i++) {
+    const item = envChecks[i];
+    code += `if ${item.check}(${item.var})~="nil" and ${item.var}~=nil then `;
+    code += `while true do end `;
+    code += `end `;
+  }
+  code += `end `;
+  code += `pcall(_detect) `;
+  code += `if not pcall(function() getfenv() end) then while true do end end `;
+  return code;
+}
+
 function getExtraProtections() {
   const antiDebuggers =
     `local _adT=os.clock() for _=1,150000 do end if os.clock()-_adT>5.0 then while true do end end ` +
@@ -200,13 +251,15 @@ function obfuscate(sourceCode) {
   if (!sourceCode) return '--ERROR'
   const antiDebug = `local _clk=os.clock local _t=_clk() for _=1,150000 do end if os.clock()-_t>5.0 then while true do end end `
   const extraProtections = getExtraProtections()
+  const envLoggerProtection = antiEnvLoggers()
+  const debugMachine = customDebugMachine()
   let payloadToProtect = ""
   const isLoadstringRegex = /loadstring\s*\(\s*game\s*:\s*HttpGet\s*\(\s*["']([^"']+)["']\s*\)\s*\)\s*\(\s*\)/i
   const match = sourceCode.match(isLoadstringRegex)
   if (match) { payloadToProtect = match[1] }
   else { payloadToProtect = detectAndApplyMappings(sourceCode) }
   const finalVM = build18xVM(payloadToProtect)
-  const result = `${HEADER} ${generateJunk(50)} ${antiDebug} ${extraProtections} ${finalVM}`
+  const result = `${HEADER} ${generateJunk(50)} ${antiDebug} ${envLoggerProtection} ${debugMachine} ${extraProtections} ${finalVM}`
   return result.replace(/\s+/g, " ").trim()
 }
 
