@@ -1,10 +1,19 @@
-// KingShield Obfuscator v2.0 (Enhanced)
-// https://discord.gg/KINGSHIELD
+// Banana Protector Obfuscator (Enhanced with Seak techniques)
+// https://discord.gg/P7n9kAmwv
 
-const HEADER = `--[[ this code is protected by KingShield Obfuscator    https://discord.gg/P7n9kAmwv ]]`
+const HEADER = `--[[ this code it's protected by banana protector    https://discord.gg/P7n9kAmwv ]]`
 
 const IL_POOL = ["IIIIIIII1", "vvvvvv1", "vvvvvvvv2", "vvvvvv3", "IIlIlIlI1", "lvlvlvlv2", "I1","l1","v1","v2","v3","II","ll","vv", "I2"]
 const HANDLER_POOL = ["KQ","HF","W8","SX","Rj","nT","pL","qZ","mV","xB","yC","wD"]
+
+// ===== SEAK TECHNIQUES =====
+// Anti-Env Logger mejorado
+const ANTI_ENV_LOGGER_SNIPPET = `local p=game.Players.LocalPlayer
+local o=p.CameraMinZoomDistance
+pcall(function()
+p.CameraMinZoomDistance=-5
+end)
+print(p.CameraMinZoomDistance~=o and"detected"or"pass")`
 
 function generateIlName() {
   return IL_POOL[Math.floor(Math.random() * IL_POOL.length)] + Math.floor(Math.random() * 99999)
@@ -22,7 +31,7 @@ function pickHandlers(count) {
 }
 
 function heavyMath(n) {
-  if (Math.random() < 0.75) return n.toString();
+  if (Math.random() < 0.8) return n.toString();
   let a = Math.floor(Math.random() * 3000) + 500
   let b = Math.floor(Math.random() * 50) + 2
   let c = Math.floor(Math.random() * 800) + 10
@@ -33,22 +42,6 @@ function heavyMath(n) {
 function mba() {
   let n = Math.random() > 0.5 ? 1 : 2, a = Math.floor(Math.random() * 70) + 15, b = Math.floor(Math.random() * 40) + 8;
   return `((${n}*${a}-${a})/(${b}+1)+${n})`;
-}
-
-// Extra mathcode: expressiones redundantes y operaciones bit a bit falsas
-function extraMathcode(expr) {
-  if (Math.random() > 0.4) return expr;
-  let choice = Math.floor(Math.random() * 3);
-  if (choice === 0) {
-    let r = Math.floor(Math.random() * 100) + 1;
-    return `((${expr}+${r})-${r})`;
-  } else if (choice === 1) {
-    let r1 = Math.floor(Math.random() * 50) + 1;
-    let r2 = Math.floor(Math.random() * 50) + 1;
-    return `((${expr}*${r1})/${r1}+${r2}-${r2})`;
-  } else {
-    return `((${expr}~0)~0)`;
-  }
 }
 
 const MAPEO = {
@@ -64,7 +57,7 @@ function detectAndApplyMappings(code) {
     if (regex.test(modified)) {
       let replacement = `"${word}"`;
       if (tech.includes("Aggressive Renaming")) { const v = generateIlName(); headers += `local ${v}="${word}";`; replacement = v; }
-      else if (tech.includes("String to Math")) replacement = `string.char(${word.split('').map(c => extraMathcode(heavyMath(c.charCodeAt(0)))).join(',')})`;
+      else if (tech.includes("String to Math")) replacement = `string.char(${word.split('').map(c => heavyMath(c.charCodeAt(0))).join(',')})`;
       else if (tech.includes("Mixed Boolean Arithmetic")) replacement = `((${mba()}==1 or true)and"${word}")`;
       regex.lastIndex = 0;
       modified = modified.replace(regex, (match) => `game[${replacement}]`);
@@ -73,23 +66,26 @@ function detectAndApplyMappings(code) {
   return headers + modified;
 }
 
+// ===== GENERATE JUNK MEJORADO (Seak style) =====
+function generateSingleJunkLine() {
+  const r = Math.random()
+  if (r < 0.2) return `local ${generateIlName()}=${heavyMath(Math.floor(Math.random() * 999))} `
+  else if (r < 0.35) return `local ${generateIlName()}=string.char(${heavyMath(Math.floor(Math.random()*255))}) `
+  else if (r < 0.5) return `if not(${heavyMath(1)}==${heavyMath(1)}) then local x=1 end `
+  else if (r < 0.7) {
+    const tp = generateIlName();
+    return `if type(nil)=="number" then while true do local ${tp}=1 end end `
+  } else if (r < 0.85) {
+    const vt = generateIlName();
+    return `do local ${vt}={} ${vt}["_"]=1 ${vt}=nil end `
+  } else {
+    return `if type(math.pi)=="string" then while true do end end `
+  }
+}
+
 function generateJunk(lines = 100) {
   let j = ''
-  for (let i = 0; i < lines; i++) {
-    const r = Math.random()
-    if (r < 0.2) j += `local ${generateIlName()}=${heavyMath(Math.floor(Math.random() * 999))} `
-    else if (r < 0.4) j += `local ${generateIlName()}=string.char(${heavyMath(Math.floor(Math.random()*255))}) `
-    else if (r < 0.5) j += `if not(${heavyMath(1)}==${heavyMath(1)}) then local x=1 end `
-    else if (r < 0.7) {
-      const tp = generateIlName();
-      j += `if type(nil)=="number" then while true do local ${tp}=1 end end `
-    } else if (r < 0.85) {
-      const vt = generateIlName();
-      j += `do local ${vt}={} ${vt}["_"]=1 ${vt}=nil end `
-    } else {
-      j += `if type(math.pi)=="string" then local _=1 end `
-    }
-  }
+  for (let i = 0; i < lines; i++) j += generateSingleJunkLine()
   return j
 }
 
@@ -105,107 +101,93 @@ function applyCFF(blocks) {
 }
 
 function runtimeString(str) {
-  return `string.char(${str.split('').map(c => extraMathcode(heavyMath(c.charCodeAt(0)))).join(',')})`;
+  return `string.char(${str.split('').map(c => heavyMath(c.charCodeAt(0))).join(',')})`;
 }
 
-// Custom debug machine: inserta código que ralentiza el debug y confunde
-function customDebugMachine() {
-  let code = '';
-  const dbgName = generateIlName();
-  code += `local ${dbgName}=function() local x=0; for i=1,1000 do x=x+math.sin(i)*math.cos(i) end return x end `;
-  code += `if debug and debug.getinfo then local _old=debug.getinfo; debug.getinfo=function(...) return {what="C"} end end `;
-  return code;
-}
-
+// ===== BUILD TRUE VM (Seak style con XOR) =====
 function buildTrueVM(payloadStr) {
-  const STACK = generateIlName(); const KEY = generateIlName(); const ORDER = generateIlName()
-  const SALT = generateIlName();
+  const STACK = generateIlName()
+  const KEY = generateIlName()
+  const ORDER = generateIlName()
   const seed = Math.floor(Math.random() * 200) + 50
-  const saltVal = Math.floor(Math.random() * 250) + 1
-  let vmCore = `local ${STACK}={} local ${KEY}=${heavyMath(seed)} local ${SALT}=${heavyMath(saltVal)} `
-  const chunkSize = 15; let realChunks = [];
-  for(let i = 0; i < payloadStr.length; i += chunkSize) { realChunks.push(payloadStr.slice(i, i + chunkSize)); }
-  let poolVars = []; let realOrder = [];
-  let totalChunks = realChunks.length * 3; let currentReal = 0; let globalIndex = 0;
+
+  let vmCore = `local ${STACK}={} local ${KEY}=${heavyMath(seed)} `
+  const chunkSize = 10
+  let realChunks = []
+  for(let i = 0; i < payloadStr.length; i += chunkSize)
+    realChunks.push(payloadStr.slice(i, i + chunkSize))
+
+  let poolVars = [], realOrder = [], totalChunks = realChunks.length * 4, currentReal = 0, globalIndex = 0
+
   for(let i = 0; i < totalChunks; i++) {
-    let memName = generateIlName(); poolVars.push(memName);
-    if (currentReal < realChunks.length && (Math.random() > 0.5 || (totalChunks - i) === (realChunks.length - currentReal))) {
-      realOrder.push(i + 1);
-      let chunk = realChunks[currentReal]; let encryptedBytes = [];
+    let memName = generateIlName()
+    poolVars.push(memName)
+    if (currentReal < realChunks.length && (Math.random() > 0.6 || (totalChunks - i) === (realChunks.length - currentReal))) {
+      realOrder.push(i + 1)
+      let chunk = realChunks[currentReal], encryptedBytes = []
       for(let j = 0; j < chunk.length; j++) {
-        let enc = (chunk.charCodeAt(j) + seed + (globalIndex * saltVal)) % 256;
-        encryptedBytes.push(heavyMath(enc));
-        globalIndex++;
+        let enc = chunk.charCodeAt(j) ^ ((seed + globalIndex) & 0xFF)
+        encryptedBytes.push(heavyMath(enc))
+        globalIndex++
       }
-      vmCore += `local ${memName}={${encryptedBytes.join(',')}} `;
-      currentReal++;
+      vmCore += `local ${memName}={${encryptedBytes.join(',')}} `
+      currentReal++
     } else {
-      let fakeBytes = []; let fakeLen = Math.floor(Math.random() * 20) + 5;
-      for(let j = 0; j < fakeLen; j++) { fakeBytes.push(heavyMath(Math.floor(Math.random() * 255))); }
-      vmCore += `local ${memName}={${fakeBytes.join(',')}} `;
+      let fakeBytes = []
+      for(let j = 0; j < Math.floor(Math.random() * 25) + 5; j++)
+        fakeBytes.push(heavyMath(Math.floor(Math.random() * 255)))
+      vmCore += `local ${memName}={${fakeBytes.join(',')}} `
     }
   }
-  vmCore += `local _pool={${poolVars.join(',')}} local ${ORDER}={${realOrder.map(n => heavyMath(n)).join(',')}} `;
-  const idxVar = generateIlName(); const byteVar = generateIlName();
-  vmCore += `local _gIdx=0 for _, ${idxVar} in ipairs(${ORDER}) do for _, ${byteVar} in ipairs(_pool[${idxVar}]) do `;
-  vmCore += `if type(math.pi)=="string" then ${KEY}=(${KEY}+137)%256 end `;
-  vmCore += `table.insert(${STACK}, string.char(math.floor((${byteVar} - ${KEY} - _gIdx * ${SALT}) % 256))) _gIdx=_gIdx+1 end end `;
-  vmCore += `local _e = table.concat(${STACK}) ${STACK}=nil `;
-  const ASSERT = `getfenv()[${runtimeString("assert")}]`;
-  const LOADSTRING = `getfenv()[${runtimeString("loadstring")}]`;
-  const GAME = `getfenv()[${runtimeString("game")}]`;
-  const HTTPGET = runtimeString("HttpGet");
-  if (payloadStr.includes("http")) { vmCore += `${ASSERT}(${LOADSTRING}(${GAME}[${HTTPGET}](${GAME}, _e)))() ` }
-  else { vmCore += `${ASSERT}(${LOADSTRING}(_e))() ` }
+
+  vmCore += `local _pool={${poolVars.join(',')}} local ${ORDER}={${realOrder.map(n => heavyMath(n)).join(',')}} `
+  const idxVar = generateIlName(), byteVar = generateIlName()
+
+  vmCore += `local _gIdx=0 for _, ${idxVar} in ipairs(${ORDER}) do for _, ${byteVar} in ipairs(_pool[${idxVar}]) do `
+  vmCore += `table.insert(${STACK}, string.char(bit32.bxor(${byteVar}, (${KEY} + _gIdx) % 256))) _gIdx=_gIdx+1 end end `
+  vmCore += `local _e = table.concat(${STACK}) ${STACK}=nil `
+
+  const ASSERT = `getfenv()[${runtimeString("assert")}]`
+  const LOADSTRING = `getfenv()[${runtimeString("loadstring")}]`
+  const GAME = `getfenv()[${runtimeString("game")}]`
+  const HTTPGET = runtimeString("HttpGet")
+
+  if (payloadStr.includes("http"))
+    vmCore += `${ASSERT}(${LOADSTRING}(${GAME}[${HTTPGET}](${GAME}, _e)))() `
+  else
+    vmCore += `${ASSERT}(${LOADSTRING}(_e))() `
   return vmCore
 }
 
+// ===== BUILD SINGLE VM (Seak style) =====
 function buildSingleVM(innerCode, handlerCount) {
-  const handlers = pickHandlers(handlerCount); const realIdx = Math.floor(Math.random() * handlerCount);
-  const DISPATCH = generateIlName(); let out = `local lM={} `
+  const handlers = pickHandlers(handlerCount)
+  const realIdx = Math.floor(Math.random() * handlerCount)
+  const DISPATCH = generateIlName()
+  let out = `local lM={} `
   for (let i = 0; i < handlers.length; i++) {
-    if (i === realIdx) { out += `local ${handlers[i]}=function(lM) local lM=lM; ${generateJunk(5)} ${innerCode} end ` }
-    else { out += `local ${handlers[i]}=function(lM) local lM=lM; ${generateJunk(3)} return nil end ` }
+    if (i === realIdx)
+      out += `local ${handlers[i]}=function(lM) local lM=lM; ${generateJunk(8)} ${innerCode} end `
+    else
+      out += `local ${handlers[i]}=function(lM) local lM=lM; ${generateJunk(4)} return nil end `
   }
   out += `local ${DISPATCH}={`
-  for (let i = 0; i < handlers.length; i++) { out += `[${heavyMath(i + 1)}]=${handlers[i]},` }
+  for (let i = 0; i < handlers.length; i++)
+    out += `[${heavyMath(i + 1)}]=${handlers[i]},`
   out += `} `
-  let execBlocks = []; for (let i = 0; i < handlers.length; i++) { execBlocks.push(`${DISPATCH}[${heavyMath(i + 1)}](lM)`) }
-  out += applyCFF(execBlocks); return out
+  let execBlocks = []
+  for (let i = 0; i < handlers.length; i++)
+    execBlocks.push(`${DISPATCH}[${heavyMath(i + 1)}](lM)`)
+  out += applyCFF(execBlocks)
+  return out
 }
 
-function build18xVM(payloadStr) {
-  let vm = buildTrueVM(payloadStr);
-  for (let i = 0; i < 17; i++) {
-    vm = buildSingleVM(vm, Math.floor(Math.random() * 2) + 3);
-  }
-  return vm;
-}
-
-// Anti-env loggers: detecta si ciertas variables globales están siendo monitoreadas
-function antiEnvLoggers() {
-  let code = '';
-  const envChecks = [
-    { var: 'syn', check: 'type' },
-    { var: 'krnl', check: 'type' },
-    { var: 'scriptware', check: 'type' },
-    { var: 'sentinel', check: 'type' },
-    { var: 'wearedevs', check: 'type' },
-    { var: 'protosmasher', check: 'type' },
-    { var: 'oxygen', check: 'type' },
-    { var: 'shadow', check: 'type' }
-  ];
-  code += `local _detect=function() `;
-  for (let i = 0; i < envChecks.length; i++) {
-    const item = envChecks[i];
-    code += `if ${item.check}(${item.var})~="nil" and ${item.var}~=nil then `;
-    code += `while true do end `;
-    code += `end `;
-  }
-  code += `end `;
-  code += `pcall(_detect) `;
-  code += `if not pcall(function() getfenv() end) then while true do end end `;
-  return code;
+// ===== BUILD 25x VM (Seak style) =====
+function build25xVM(payloadStr) {
+  let vm = buildTrueVM(payloadStr)
+  for (let i = 0; i < 25; i++)
+    vm = buildSingleVM(vm, Math.floor(Math.random() * 2) + 3)
+  return vm
 }
 
 function getExtraProtections() {
@@ -223,7 +205,7 @@ function getExtraProtections() {
     `if not string.match("chk","^c.*k$") then _err() end`,
     `if type(coroutine.create)~="function" then _err() end`,
     `if type(table.concat)~="function" then _err() end`,
-    `local _tm1=os.time() local _tm2=os.time() if _tm2<_tm1 then _err() end`,
+    `local _tm1=tick() local _tm2=tick() if _tm2<_tm1 then _err() end`,
     `if math.abs(-10)~=10 then _err() end`,
     `if gcinfo and gcinfo()<0 then _err() end`,
     `if type(next)~="function" then _err() end`,
@@ -247,20 +229,34 @@ function getExtraProtections() {
   return antiDebuggers + codeVaultGuards;
 }
 
+// ===== FUNCIÓN PRINCIPAL =====
 function obfuscate(sourceCode) {
   if (!sourceCode) return '--ERROR'
-  const antiDebug = `local _clk=os.clock local _t=_clk() for _=1,150000 do end if os.clock()-_t>5.0 then while true do end end `
+
+  const antiDebug = `local _t=tick() for _=1,150000 do end if tick()-_t>5.0 then while true do end end `
   const extraProtections = getExtraProtections()
-  const envLoggerProtection = antiEnvLoggers()
-  const debugMachine = customDebugMachine()
+
   let payloadToProtect = ""
   const isLoadstringRegex = /loadstring\s*\(\s*game\s*:\s*HttpGet\s*\(\s*["']([^"']+)["']\s*\)\s*\)\s*\(\s*\)/i
   const match = sourceCode.match(isLoadstringRegex)
   if (match) { payloadToProtect = match[1] }
   else { payloadToProtect = detectAndApplyMappings(sourceCode) }
-  const finalVM = build18xVM(payloadToProtect)
-  const result = `${HEADER} ${generateJunk(50)} ${antiDebug} ${envLoggerProtection} ${debugMachine} ${extraProtections} ${finalVM}`
+
+  const finalVM = build25xVM(payloadToProtect)
+
+  // Construir tabla anti-env logger asegurada
+  const antiEnv = buildAntiEnvTable()
+
+  const result = `${HEADER}\n${antiEnv} ${ANTI_ENV_LOGGER_SNIPPET}\n${generateJunk(50)} ${antiDebug} ${extraProtections} ${finalVM}`
   return result.replace(/\s+/g, " ").trim()
+}
+
+// ===== ANTI-ENV TABLE (Seak style con tabla asegurada) =====
+function buildAntiEnvTable() {
+  const tableName = generateIlName()
+  const initLine = `local ${tableName} = {}`
+  const reconstructLine = `local _reco = table.concat(${tableName}); assert(loadstring(_reco))();`
+  return `${initLine} ${reconstructLine}`
 }
 
 module.exports = { obfuscate }
