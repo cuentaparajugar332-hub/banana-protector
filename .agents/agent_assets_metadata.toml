@@ -24,3 +24,9 @@ id = "svpjww5pS7NQJkeMN1LMz"
 uri = "file://banana-railway-ready.zip"
 type = "unspecified"
 title = "Banana Protector — listo para Railway"
+
+[[outputs]]
+id = "vPG6VZsGB4joinQ3pmk8P"
+uri = "file://banana-render-ready.zip"
+type = "unspecified"
+title = "Banana Protector — listo para Render + GitHub + instrucciones completas"
