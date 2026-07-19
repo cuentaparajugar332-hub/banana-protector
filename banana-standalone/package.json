@@ -5,6 +5,7 @@
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
+    "start": "node server.js",
     "start:api": "node server.js",
     "start:bot": "node bot.js",
     "deploy": "node deploy-commands.js"

@@ -18,3 +18,9 @@ id = "vbhhy7JpdCW6SzQHW9epT"
 uri = "file://banana-standalone-v2.zip"
 type = "unspecified"
 title = "Banana Protector Standalone v2 — obfuscador actualizado"
+
+[[outputs]]
+id = "svpjww5pS7NQJkeMN1LMz"
+uri = "file://banana-railway-ready.zip"
+type = "unspecified"
+title = "Banana Protector — listo para Railway"
