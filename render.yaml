@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     buildCommand: cd banana-standalone && rm -rf node_modules && npm install --no-audit --no-fund
-    startCommand: cd banana-standalone && npm run start:api
+    startCommand: cd banana-standalone && npm install --no-audit --no-fund && npm run start:api
     envVars:
       - key: BOT_API_KEY
         generateValue: true
@@ -16,7 +16,7 @@ services:
     runtime: node
     plan: free
     buildCommand: cd banana-standalone && rm -rf node_modules && npm install --no-audit --no-fund
-    startCommand: cd banana-standalone && npm run start:bot
+    startCommand: cd banana-standalone && npm install --no-audit --no-fund && npm run start:bot
     envVars:
       - key: DISCORD_TOKEN
         sync: false
