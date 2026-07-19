@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: banana-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run start:api
+    envVars:
+      - key: BOT_API_KEY
+        generateValue: true
+      - key: API_BASE_URL
+        value: https://banana-api.onrender.com
+
+  - type: worker
+    name: banana-bot
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run start:bot
+    envVars:
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: DISCORD_CLIENT_ID
+        sync: false
+      - key: BOT_API_KEY
+        fromService:
+          name: banana-api
+          type: web
+          envVarKey: BOT_API_KEY
+      - key: API_URL
+        fromService:
+          name: banana-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: ALLOWED_GUILD_IDS
+        sync: false
+      - key: ALLOWED_USER_IDS
+        sync: false
