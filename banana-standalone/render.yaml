@@ -3,7 +3,7 @@ services:
     name: banana-api
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install --no-audit --no-fund
     startCommand: npm run start:api
     envVars:
       - key: BOT_API_KEY
@@ -15,7 +15,7 @@ services:
     name: banana-bot
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install --no-audit --no-fund
     startCommand: npm run start:bot
     envVars:
       - key: DISCORD_TOKEN

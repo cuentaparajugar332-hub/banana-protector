@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     rootDir: banana-standalone
-    buildCommand: npm install
+    buildCommand: npm install --no-audit --no-fund
     startCommand: npm run start:api
     envVars:
       - key: BOT_API_KEY
@@ -17,7 +17,7 @@ services:
     runtime: node
     plan: free
     rootDir: banana-standalone
-    buildCommand: npm install
+    buildCommand: npm install --no-audit --no-fund
     startCommand: npm run start:bot
     envVars:
       - key: DISCORD_TOKEN
