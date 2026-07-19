@@ -3,9 +3,8 @@ services:
     name: banana-api
     runtime: node
     plan: free
-    rootDir: banana-standalone
-    buildCommand: npm install --no-audit --no-fund
-    startCommand: npm run start:api
+    buildCommand: cd banana-standalone && npm install --no-audit --no-fund
+    startCommand: cd banana-standalone && npm run start:api
     envVars:
       - key: BOT_API_KEY
         generateValue: true
@@ -16,9 +15,8 @@ services:
     name: banana-bot
     runtime: node
     plan: free
-    rootDir: banana-standalone
-    buildCommand: npm install --no-audit --no-fund
-    startCommand: npm run start:bot
+    buildCommand: cd banana-standalone && npm install --no-audit --no-fund
+    startCommand: cd banana-standalone && npm run start:bot
     envVars:
       - key: DISCORD_TOKEN
         sync: false
