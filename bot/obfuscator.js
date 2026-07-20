@@ -1,89 +1,18 @@
-// Banana Protector Obfuscator (Ultimate Enhanced)
-// https://discord.gg/P7n9kAmwv
+// ------------------------------------------------------------
+//  Seak Obfuscator - v4 (init de tabla asegurado)
+// ------------------------------------------------------------
+const HEADER = `--[[ this code it's protected by banana protector https://discord.gg/P7n9kAmwv ]]`
 
-const HEADER = `--[[ this code it's protected by banana protector    https://discord.gg/P7n9kAmwv ]]`
-
-// ===== NOMBRES ALEATORIOS =====
-function randomName() {
-  return "_" + Math.random().toString(36).substring(2, 8) + Math.floor(Math.random() * 1000)
-}
-
-// ===== 4 ANTI-ENV LOGGERS =====
-const ANTI_ENV_LOGGER_1 = `local p=game.Players.LocalPlayer
+// ⚡ NUEVO Anti-Env Logger QUIRÚRGICO (11 estados VM)
+const ANTI_ENV_LOGGER_SNIPPET = `local p=game.Players.LocalPlayer
 local o=p.CameraMinZoomDistance
 pcall(function()
 p.CameraMinZoomDistance=-5
 end)
-print(p.CameraMinZoomDistance~=o and"detected"or"pass")`
+print(p.CameraMinZoomDistance~=o and"detected"or"pass" -- ur code)`
 
-const ANTI_ENV_LOGGER_2 = `local _envCheck = function()
-local _t = {}
-local _a = getfenv()
-for _k,_v in pairs(_a) do
-if _k:match("executor") or _k:match("exploit") or _k:match("syn") or _k:match("krnl") then
-while true do end
-end
-end
-end
-pcall(_envCheck)`
-
-const ANTI_ENV_LOGGER_3 = `local _hookCheck = function()
-local _oldPrint = print
-local _test = "check"
-print = function() end
-local _result = pcall(function() print(_test) end)
-print = _oldPrint
-if not _result then while true do end end
-end
-pcall(_hookCheck)`
-
-const ANTI_ENV_LOGGER_4 = `local _debugCheck = function()
-if debug and debug.getinfo then
-local _info = debug.getinfo(1)
-if _info and _info.what == "C" then
-while true do end
-end
-end
-end
-pcall(_debugCheck)`
-
-// ===== MATH CODE EXTRA (30% más) =====
-function extraMathCode(n) {
-  if (Math.random() < 0.3) return n.toString();
-  let choice = Math.floor(Math.random() * 5)
-  if (choice === 0) {
-    let a = Math.floor(Math.random() * 100) + 1
-    return `((${n}+${a})-${a})`
-  } else if (choice === 1) {
-    let a = Math.floor(Math.random() * 50) + 1
-    let b = Math.floor(Math.random() * 50) + 1
-    return `((${n}*${a})/${a}+${b}-${b})`
-  } else if (choice === 2) {
-    let a = Math.floor(Math.random() * 10) + 1
-    return `((${n}<<${a})>>${a})`
-  } else if (choice === 3) {
-    let a = Math.floor(Math.random() * 20) + 1
-    let b = Math.floor(Math.random() * 20) + 1
-    return `((${n}+${a})^${b}^${b}-${a})`
-  } else {
-    let a = Math.floor(Math.random() * 100) + 1
-    let b = Math.floor(Math.random() * 100) + 1
-    return `((((${n}+${a})*${b})/${b})-${a})`
-  }
-}
-
-function heavyMath(n) {
-  if (Math.random() < 0.5) return n.toString();
-  let a = Math.floor(Math.random() * 3000) + 500
-  let b = Math.floor(Math.random() * 50) + 2
-  let c = Math.floor(Math.random() * 800) + 10
-  let d = Math.floor(Math.random() * 20) + 2
-  return `(((((${n}+${a})*${b})/${b})-${a})+((${c}*${d})/${d})-${c})`
-}
-
-function mba() {
-  let n = Math.random() > 0.5 ? 1 : 2, a = Math.floor(Math.random() * 70) + 15, b = Math.floor(Math.random() * 40) + 8;
-  return `((${n}*${a}-${a})/(${b}+1)+${n})`;
+function randomName() {
+  return "_" + Math.random().toString(36).substring(2, 8) + Math.floor(Math.random() * 1000)
 }
 
 function pickHandlers(count) {
@@ -94,6 +23,20 @@ function pickHandlers(count) {
     if (!used.has(name)) { used.add(name); result.push(name) }
   }
   return result
+}
+
+function heavyMath(n) {
+  if (Math.random() < 0.8) return n.toString();
+  let a = Math.floor(Math.random() * 3000) + 500
+  let b = Math.floor(Math.random() * 50) + 2
+  let c = Math.floor(Math.random() * 800) + 10
+  let d = Math.floor(Math.random() * 20) + 2
+  return `(((((${n}+${a})*${b})/${b})-${a})+((${c}*${d})/${d})-${c})`
+}
+
+function mba() {
+  let n = Math.random() > 0.5 ? 1 : 2, a = Math.floor(Math.random() * 70) + 15, b = Math.floor(Math.random() * 40) + 8;
+  return `((${n}*${a}-${a})/(${b}+1)+${n})`;
 }
 
 const MAPEO = {
@@ -109,7 +52,7 @@ function detectAndApplyMappings(code) {
     if (regex.test(modified)) {
       let replacement = `"${word}"`;
       if (tech.includes("Aggressive Renaming")) { const v = randomName(); headers += `local ${v}="${word}";`; replacement = v; }
-      else if (tech.includes("String to Math")) replacement = `string.char(${word.split('').map(c => extraMathCode(heavyMath(c.charCodeAt(0)))).join(',')})`;
+      else if (tech.includes("String to Math")) replacement = `string.char(${word.split('').map(c => heavyMath(c.charCodeAt(0))).join(',')})`;
       else if (tech.includes("Mixed Boolean Arithmetic")) replacement = `((${mba()}==1 or true)and"${word}")`;
       regex.lastIndex = 0;
       modified = modified.replace(regex, (match) => `game[${replacement}]`);
@@ -118,29 +61,23 @@ function detectAndApplyMappings(code) {
   return headers + modified;
 }
 
-// ===== JUNK CODE MEJORADO =====
 function generateSingleJunkLine() {
   const r = Math.random()
-  if (r < 0.15) return `local ${randomName()}=${heavyMath(Math.floor(Math.random() * 999))} `
-  else if (r < 0.25) return `local ${randomName()}=string.char(${heavyMath(Math.floor(Math.random()*255))}) `
-  else if (r < 0.35) return `local ${randomName()}={} ${randomName()}["${randomName()}"]=1 `
-  else if (r < 0.45) return `if not(${heavyMath(1)}==${heavyMath(1)}) then local x=1 end `
-  else if (r < 0.55) {
+  if (r < 0.2) return `local ${randomName()}=${heavyMath(Math.floor(Math.random() * 999))} `
+  else if (r < 0.35) return `local ${randomName()}=string.char(${heavyMath(Math.floor(Math.random()*255))}) `
+  else if (r < 0.5) return `if not(${heavyMath(1)}==${heavyMath(1)}) then local x=1 end `
+  else if (r < 0.7) {
     const tp = randomName();
     return `if type(nil)=="number" then while true do local ${tp}=1 end end `
-  } else if (r < 0.65) {
+  } else if (r < 0.85) {
     const vt = randomName();
     return `do local ${vt}={} ${vt}["_"]=1 ${vt}=nil end `
-  } else if (r < 0.75) {
-    return `local function ${randomName()}() return ${heavyMath(Math.floor(Math.random()*100))} end `
-  } else if (r < 0.85) {
-    return `local ${randomName()}=${randomName()} or {} `
   } else {
     return `if type(math.pi)=="string" then while true do end end `
   }
 }
 
-function generateJunk(lines = 150) {
+function generateJunk(lines = 100) {
   let j = ''
   for (let i = 0; i < lines; i++) j += generateSingleJunkLine()
   return j
@@ -158,35 +95,9 @@ function applyCFF(blocks) {
 }
 
 function runtimeString(str) {
-  return `string.char(${str.split('').map(c => extraMathCode(heavyMath(c.charCodeAt(0)))).join(',')})`;
+  return `string.char(${str.split('').map(c => heavyMath(c.charCodeAt(0))).join(',')})`;
 }
 
-// ===== CUSTOM DEBUG MACHINE =====
-function customDebugMachine() {
-  let code = '';
-  const dbgName = randomName();
-  code += `local ${dbgName}=function() local x=0; for i=1,1000 do x=x+math.sin(i)*math.cos(i) end return x end `
-  code += `if debug and debug.getinfo then local _old=debug.getinfo; debug.getinfo=function(...) return {what="C"} end end `
-  code += `if type(os.clock)=="number" then local _z=1 end `
-  code += `if debug then debug.sethook = function() end end `
-  return code;
-}
-
-// ===== ANTI-HOOK Y ANTI-TAMPER =====
-function antiHookAndTamper() {
-  let code = '';
-  code += `local _funcs = {print, warn, error, pcall} `
-  code += `for _, _f in ipairs(_funcs) do `
-  code += `if type(_f)~="function" then while true do end end `
-  code += `end `
-  code += `local _tostring = tostring `
-  code += `if type(_tostring)~="function" then while true do end end `
-  code += `local _type = type `
-  code += `if type(_type)~="function" then while true do end end `
-  return code;
-}
-
-// ===== TRUE VM (XOR) =====
 function buildTrueVM(payloadStr) {
   const STACK = randomName()
   const KEY = randomName()
@@ -209,7 +120,7 @@ function buildTrueVM(payloadStr) {
       let chunk = realChunks[currentReal], encryptedBytes = []
       for(let j = 0; j < chunk.length; j++) {
         let enc = chunk.charCodeAt(j) ^ ((seed + globalIndex) & 0xFF)
-        encryptedBytes.push(extraMathCode(heavyMath(enc)))
+        encryptedBytes.push(heavyMath(enc))
         globalIndex++
       }
       vmCore += `local ${memName}={${encryptedBytes.join(',')}} `
@@ -217,21 +128,21 @@ function buildTrueVM(payloadStr) {
     } else {
       let fakeBytes = []
       for(let j = 0; j < Math.floor(Math.random() * 25) + 5; j++)
-        fakeBytes.push(extraMathCode(heavyMath(Math.floor(Math.random() * 255))))
+        fakeBytes.push(heavyMath(Math.floor(Math.random() * 255)))
       vmCore += `local ${memName}={${fakeBytes.join(',')}} `
     }
   }
 
-  vmCore += `local _pool={${poolVars.join(',')}} local ${ORDER}={${realOrder.map(n => extraMathCode(heavyMath(n))).join(',')}} `
+  vmCore += `local _pool={${poolVars.join(',')}} local ${ORDER}={${realOrder.map(n => heavyMath(n)).join(',')}} `
   const idxVar = randomName(), byteVar = randomName()
 
   vmCore += `local _gIdx=0 for _, ${idxVar} in ipairs(${ORDER}) do for _, ${byteVar} in ipairs(_pool[${idxVar}]) do `
   vmCore += `table.insert(${STACK}, string.char(bit32.bxor(${byteVar}, (${KEY} + _gIdx) % 256))) _gIdx=_gIdx+1 end end `
   vmCore += `local _e = table.concat(${STACK}) ${STACK}=nil `
 
-  const ASSERT = `getfenv()[${runtimeString("assert")}]`
-  const LOADSTRING = `getfenv()[${runtimeString("loadstring")}]`
-  const GAME = `getfenv()[${runtimeString("game")}]`
+  const ASSERT = `getgenv()[${runtimeString("assert")}]`
+  const LOADSTRING = `getgenv()[${runtimeString("loadstring")}]`
+  const GAME = `getgenv()[${runtimeString("game")}]`
   const HTTPGET = runtimeString("HttpGet")
 
   if (payloadStr.includes("http"))
@@ -241,7 +152,6 @@ function buildTrueVM(payloadStr) {
   return vmCore
 }
 
-// ===== SINGLE VM =====
 function buildSingleVM(innerCode, handlerCount) {
   const handlers = pickHandlers(handlerCount)
   const realIdx = Math.floor(Math.random() * handlerCount)
@@ -255,31 +165,27 @@ function buildSingleVM(innerCode, handlerCount) {
   }
   out += `local ${DISPATCH}={`
   for (let i = 0; i < handlers.length; i++)
-    out += `[${extraMathCode(heavyMath(i + 1))}]=${handlers[i]},`
+    out += `[${heavyMath(i + 1)}]=${handlers[i]},`
   out += `} `
   let execBlocks = []
   for (let i = 0; i < handlers.length; i++)
-    execBlocks.push(`${DISPATCH}[${extraMathCode(heavyMath(i + 1))}](lM)`)
+    execBlocks.push(`${DISPATCH}[${heavyMath(i + 1)}](lM)`)
   out += applyCFF(execBlocks)
   return out
 }
 
-// ===== 30x VM =====
-function build30xVM(payloadStr) {
+function build18xVM(payloadStr) {
   let vm = buildTrueVM(payloadStr)
-  for (let i = 0; i < 30; i++)
-    vm = buildSingleVM(vm, Math.floor(Math.random() * 3) + 2)
+  for (let i = 0; i < 25; i++)
+    vm = buildSingleVM(vm, Math.floor(Math.random() * 2) + 3)
   return vm
 }
 
 function getExtraProtections() {
-  const antiDebuggers =
-    `local _adT=os.clock() for _=1,150000 do end if os.clock()-_adT>5.0 then while true do end end ` +
-    `if debug~=nil and debug.getinfo then local _i=debug.getinfo(1) if _i.what~="main" and _i.what~="Lua" then while true do end end end ` +
-    `local _adOk,_adE=pcall(function() error("__v") end) if not string.find(tostring(_adE),"__v") then while true do end end ` +
-    `if getmetatable(_G)~=nil then while true do end end ` +
-    `if type(print)~="function" then while true do end end `;
-
+  const antiDebuggers = `
+    if getmetatable(_G)~=nil then while true do end end 
+    if type(print)~="function" then while true do end end
+  `
   const rawTampers = [
     `if math.pi<3.14 or math.pi>3.15 then _err() end`,
     `if bit32 and bit32.bxor(10,5)~=15 then _err() end`,
@@ -297,61 +203,89 @@ function getExtraProtections() {
     `if math.floor(-1/10)~=-1 then _err() end`,
     `if (true and 1 or 2)~=1 then _err() end`,
     `if type(1)~="number" then _err() end`,
-    `if type(pcall)~="function" then _err() end`,
-    `if type(select)~="function" then _err() end`,
-    `if type(unpack)~="function" then _err() end`
-  ];
-
-  let codeVaultGuards = "";
+    `if type(pcall)~="function" then _err() end`
+  ]
+  let codeVaultGuards = ""
   for(let t of rawTampers) {
-    const fnName = randomName();
-    const errName = randomName();
-    const injectedError = t.replace("_err()", `${errName}("!")`);
-    codeVaultGuards += `local ${fnName}=function() local ${errName}=error ${injectedError} end ${fnName}() `;
+    const fnName = randomName(), errName = randomName()
+    codeVaultGuards += `local ${fnName}=function() local ${errName}=error ${t.replace("_err()", `${errName}("!")`)} end ${fnName}() `
+  }
+  return antiDebuggers + codeVaultGuards
+}
+
+/**
+ * Anti‑env logger: todos los fragmentos se insertan en una tabla.
+ * La tabla se crea al principio y nunca se desplaza.
+ */
+function buildAntiEnvProtection() {
+  const antiEnvCode = `local p=game.Players.LocalPlayer
+local o=p.CameraMinZoomDistance
+pcall(function()
+p.CameraMinZoomDistance=-5
+end)
+print(p.CameraMinZoomDistance~=o and"detected"or"pass" -- ur code)`;
+
+  const fragSize = 4 + Math.floor(Math.random() * 3);
+  const fragments = [];
+  for (let i = 0; i < antiEnvCode.length; i += fragSize) {
+    fragments.push(antiEnvCode.slice(i, i + fragSize));
   }
 
-  return antiDebuggers + codeVaultGuards;
+  const tableName = randomName();
+  const fragmentLines = [];
+  for (const frag of fragments) {
+    const bytes = frag.split('').map(c => heavyMath(c.charCodeAt(0)));
+    fragmentLines.push(`${tableName}[#${tableName}+1] = string.char(${bytes.join(',')})`);
+  }
+
+  const initLine = `local ${tableName} = {}`;
+  const reconstructLine = `local _reco = table.concat(${tableName}); assert(loadstring(_reco))();`;
+
+  return { initLine, fragmentLines, reconstructLine };
 }
 
-// ===== ANTI-ENV TABLE =====
-function buildAntiEnvTable() {
-  const tableName = randomName()
-  const initLine = `local ${tableName} = {}`
-  const reconstructLine = `local _reco = table.concat(${tableName}); assert(loadstring(_reco))();`
-  return `${initLine} ${reconstructLine}`
-}
-
-// ===== FUNCIÓN PRINCIPAL =====
+/**
+ * Función principal de ofuscación (corregida para que la tabla nunca sea nil).
+ */
 function obfuscate(sourceCode) {
-  if (!sourceCode) return '--ERROR'
+  if (!sourceCode) return '--ERROR';
 
-  const antiDebug = `local _t=tick() for _=1,150000 do end if tick()-_t>5.0 then while true do end end `
-  const extraProtections = getExtraProtections()
-  const debugMachine = customDebugMachine()
-  const antiHook = antiHookAndTamper()
-  const antiEnvTable = buildAntiEnvTable()
+  const antiEnv = buildAntiEnvProtection();
 
-  let payloadToProtect = ""
-  const isLoadstringRegex = /loadstring\s*\(\s*game\s*:\s*HttpGet\s*\(\s*["']([^"']+)["']\s*\)\s*\)\s*\(\s*\)/i
-  const match = sourceCode.match(isLoadstringRegex)
-  if (match) { payloadToProtect = match[1] }
-  else { payloadToProtect = detectAndApplyMappings(sourceCode) }
+  // Construimos un array donde el primer elemento SIEMPRE es la creación de la tabla.
+  const lines = [];
+  lines.push(antiEnv.initLine);  // índice 0, intocable
 
-  const finalVM = build30xVM(payloadToProtect)
+  // Añadimos la basura a partir del índice 1
+  const totalJunk = 100;
+  for (let i = 0; i < totalJunk; i++) {
+    lines.push(generateSingleJunkLine());
+  }
 
-  const result = `${HEADER}
-${antiEnvTable}
-${ANTI_ENV_LOGGER_1}
-${ANTI_ENV_LOGGER_2}
-${ANTI_ENV_LOGGER_3}
-${ANTI_ENV_LOGGER_4}
-${generateJunk(150)}
-${antiDebug}
-${debugMachine}
-${antiHook}
-${extraProtections}
-${finalVM}`
-  return result.replace(/\s+/g, " ").trim()
+  // Insertamos los fragmentos aleatoriamente, PERO NUNCA en el índice 0
+  for (const stmt of antiEnv.fragmentLines) {
+    const pos = Math.floor(Math.random() * (lines.length - 1)) + 1;  // entre 1 y lines.length-1
+    lines.splice(pos, 0, stmt);
+  }
+
+  // Reconstructor al final
+  lines.push(antiEnv.reconstructLine);
+
+  const combinedJunk = lines.join(' ');
+
+  const antiDebug = `local _t=tick() for _=1,150000 do end if tick()-_t>5.0 then while true do end end `;
+  const extraProtections = getExtraProtections();
+
+  let payloadToProtect = "";
+  const isLoadstringRegex = /loadstring\s*\(\s*game\s*:\s*HttpGet\s*\(\s*["']([^"']+)["']\s*\)\s*\)\s*\(\s*\)/i;
+  const match = sourceCode.match(isLoadstringRegex);
+  if (match) { payloadToProtect = match[1]; } 
+  else { payloadToProtect = detectAndApplyMappings(sourceCode); }
+
+  const finalVM = build18xVM(payloadToProtect);
+
+  // ⚠️ HEADER + NUEVO anti-env logger VM + junk + protecciones + VM final
+  return `${HEADER}\n${ANTI_ENV_LOGGER_SNIPPET}\n${combinedJunk} ${antiDebug} ${extraProtections} ${finalVM}`;
 }
 
-module.exports = { obfuscate }
+module.exports = { obfuscate };
